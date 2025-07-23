@@ -170,7 +170,7 @@ export default function Dashboard() {
               </label>
               <input
                 type="date"
-                className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 hover:border-gray-300"
+                className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 hover:border-gray-300 text-black"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
               />
@@ -181,7 +181,7 @@ export default function Dashboard() {
               </label>
               <input
                 type="date"
-                className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 hover:border-gray-300"
+                className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 hover:border-gray-300 text-black"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
               />

@@ -152,7 +152,7 @@ export default function RadarChartComponent({ data }: { data: any[] }) {
           🎯 Category Performance Radar
         </h2>
       </div>
-      <ResponsiveContainer width="100%" height={320}>
+      <ResponsiveContainer width="100%" height={400}>
         <RadarChart
           data={radarData}
           margin={{ top: 20, right: 30, left: 20, bottom: 20 }}

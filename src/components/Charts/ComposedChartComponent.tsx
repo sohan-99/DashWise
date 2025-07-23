@@ -15,7 +15,7 @@ import {
 
 export default function ComposedChartComponent({ data }: { data: any[] }) {
   return (
-    <div className="bg-slate-900/95 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-cyan-500/30 hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300">
+    <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/50 hover:shadow-2xl transition-all duration-300">
       <div className="flex items-center gap-3 mb-4">
         <div className="bg-gradient-to-r from-cyan-500 to-blue-600 p-2 rounded-lg shadow-lg">
           <svg
@@ -36,11 +36,18 @@ export default function ComposedChartComponent({ data }: { data: any[] }) {
           ❄️ Multi-Metric Analysis
         </h2>
       </div>
-      <ResponsiveContainer width="100%" height={320}>
+      <ResponsiveContainer width="100%" height={400}>
         <ComposedChart
           data={data}
           margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
         >
+          <defs>
+            <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.8} />
+              <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.2} />
+            </linearGradient>
+          </defs>
+
           <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.8} />
           <XAxis
             dataKey="date"
@@ -73,8 +80,10 @@ export default function ComposedChartComponent({ data }: { data: any[] }) {
             type="monotone"
             dataKey="revenue"
             fill="url(#revenueGradient)"
-            stroke="none"
-            fillOpacity={0.3}
+            stroke="#06b6d4"
+            strokeWidth={2}
+            fillOpacity={0.6}
+            name="Revenue ($)"
           />
 
           {/* Bars for Sales and Profit */}
@@ -101,13 +110,6 @@ export default function ComposedChartComponent({ data }: { data: any[] }) {
             activeDot={{ r: 6, fill: "#f59e0b" }}
             name="Orders"
           />
-
-          <defs>
-            <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.4} />
-              <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.1} />
-            </linearGradient>
-          </defs>
         </ComposedChart>
       </ResponsiveContainer>
     </div>
