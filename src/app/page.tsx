@@ -1,25 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useEffect, useState } from "react";
-import LineChartComponent from "@/components/Charts/LineChartComponent";
-import BarChartComponent from "@/components/Charts/BarChartComponent";
-import PieChartComponent from "@/components/Charts/PieChartComponent";
+import { useState, useEffect } from "react";
 import { parseISO, isWithinInterval } from "date-fns";
+import { useGetDataQuery } from "@/store/api/dataApi";
+import {
+  BarChartComponent,
+  LineChartComponent,
+  PieChartComponent,
+  ComposedChartComponent,
+  AreaChartComponent,
+  RadarChartComponent,
+} from "@/components";
 
 export default function Dashboard() {
-  const [data, setData] = useState<any[]>([]);
+  const { data = [], isLoading } = useGetDataQuery();
   const [filteredData, setFilteredData] = useState<any[]>([]);
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
+  const [activeFilter, setActiveFilter] = useState<string>("all");
 
-  useEffect(() => { 
-    fetch("/data.json")
-      .then((res) => res.json())
-      .then((json) => {
-        setData(json);
-        setFilteredData(json);
-      });
-  }, []);
+  // Update filtered data when data changes
+  useEffect(() => {
+    setFilteredData(data);
+  }, [data]);
 
   const handleFilter = () => {
     if (!startDate || !endDate) return setFilteredData(data);
@@ -32,33 +35,90 @@ export default function Dashboard() {
     );
 
     setFilteredData(filtered);
+    setActiveFilter("custom");
   };
+
+  const handleQuickFilter = (period: string) => {
+    const now = new Date();
+    let start: Date;
+
+    switch (period) {
+      case "7d":
+        start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case "30d":
+        start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case "90d":
+        start = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        setFilteredData(data);
+        setActiveFilter("all");
+        return;
+    }
+
+    const filtered = data.filter((entry) =>
+      isWithinInterval(parseISO(entry.date), { start, end: now })
+    );
+
+    setFilteredData(filtered);
+    setActiveFilter(period);
+  };
+
+  const clearFilters = () => {
+    setStartDate("");
+    setEndDate("");
+    setFilteredData(data);
+    setActiveFilter("all");
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-xl font-semibold text-gray-700">
+            Loading Dashboard...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-      {/* Header Section */}
-      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-xl">
-        <div className="p-8">
-          <div className="flex items-center gap-4">
-            <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+      {/* Animated Header Section */}
+      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative p-8">
+          <div className="flex items-center gap-4 animate-fade-in">
+            <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm animate-bounce">
               <span className="text-4xl">📊</span>
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white drop-shadow-lg">
+              <h1 className="text-4xl font-bold text-white drop-shadow-lg animate-slide-in-left">
                 Sales Analytics Dashboard
               </h1>
-              <p className="text-indigo-100 mt-2 text-lg">
-                Track your business performance with real-time insights
+              <p className="text-indigo-100 mt-2 text-lg animate-slide-in-left delay-100">
+                Track your business performance with real-time insights ✨
               </p>
             </div>
           </div>
         </div>
+
+        {/* Floating bubbles animation */}
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-white/20 rounded-full animate-float"></div>
+          <div className="absolute top-3/4 right-1/4 w-6 h-6 bg-white/10 rounded-full animate-float-delayed"></div>
+          <div className="absolute top-1/2 right-1/3 w-3 h-3 bg-white/30 rounded-full animate-float-slow"></div>
+        </div>
       </div>
 
       <div className="p-8 space-y-8">
-        {/* Enhanced Date Filter */}
-        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/50">
-          <div className="flex items-center gap-3 mb-4">
+        {/* Enhanced Filter Section with Quick Filters */}
+        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/50 animate-slide-up">
+          <div className="flex items-center gap-3 mb-6">
             <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-lg">
               <svg
                 className="w-5 h-5 text-white"
@@ -75,29 +135,53 @@ export default function Dashboard() {
               </svg>
             </div>
             <h2 className="text-xl font-semibold text-gray-800">
-              Date Range Filter
+              Smart Filters
             </h2>
           </div>
 
+          {/* Quick Filter Buttons */}
+          <div className="flex flex-wrap gap-3 mb-6">
+            {[
+              { key: "all", label: "All Time", icon: "🌍" },
+              { key: "7d", label: "Last 7 Days", icon: "📅" },
+              { key: "30d", label: "Last 30 Days", icon: "📊" },
+              { key: "90d", label: "Last 90 Days", icon: "📈" },
+            ].map((filter) => (
+              <button
+                key={filter.key}
+                onClick={() => handleQuickFilter(filter.key)}
+                className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
+                  activeFilter === filter.key
+                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg transform scale-105"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105"
+                }`}
+              >
+                <span>{filter.icon}</span>
+                {filter.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Custom Date Range */}
           <div className="flex flex-wrap items-end gap-6">
             <div className="min-w-0 flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Start Date
+                📅 Start Date
               </label>
               <input
                 type="date"
-                className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200"
+                className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 hover:border-gray-300"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
               />
             </div>
             <div className="min-w-0 flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                End Date
+                📅 End Date
               </label>
               <input
                 type="date"
-                className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200"
+                className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 hover:border-gray-300"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
               />
@@ -127,38 +211,47 @@ export default function Dashboard() {
               </svg>
               Apply Filter
             </button>
+            <button
+              onClick={clearFilters}
+              className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+              Clear
+            </button>
           </div>
         </div>
 
-        {/* Enhanced Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-          <div className="transform hover:scale-105 transition-all duration-300">
-            <LineChartComponent data={filteredData} />
-          </div>
-          <div className="transform hover:scale-105 transition-all duration-300">
-            <BarChartComponent data={filteredData} />
-          </div>
-          <div className="transform hover:scale-105 transition-all duration-300 lg:col-span-2 xl:col-span-1">
-            <PieChartComponent data={filteredData} />
-          </div>
-        </div>
-
-        {/* Stats Cards */}
+        {/* Enhanced Stats Cards with Animations */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-gradient-to-r from-emerald-500 to-teal-600 p-6 rounded-2xl text-white shadow-xl">
+          <div className="bg-gradient-to-r from-emerald-500 to-teal-600 p-6 rounded-2xl text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 animate-slide-up delay-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-emerald-100 text-sm font-medium">
-                  Total Sales
+                <p className="text-emerald-100 text-sm font-medium flex items-center gap-2">
+                  💰 Total Sales
                 </p>
-                <p className="text-3xl font-bold">
+                <p className="text-3xl font-bold animate-counter">
                   $
                   {filteredData
                     .reduce((sum, item) => sum + (item.sales || 0), 0)
                     .toLocaleString()}
                 </p>
+                <p className="text-emerald-200 text-xs mt-1">
+                  +12% from last month
+                </p>
               </div>
-              <div className="bg-white/20 p-3 rounded-xl">
+              <div className="bg-white/20 p-3 rounded-xl animate-pulse">
                 <svg
                   className="w-8 h-8"
                   fill="none"
@@ -176,15 +269,18 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 rounded-2xl text-white shadow-xl">
+          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 rounded-2xl text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 animate-slide-up delay-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-blue-100 text-sm font-medium">
-                  Total Records
+                <p className="text-blue-100 text-sm font-medium flex items-center gap-2">
+                  📊 Total Records
                 </p>
-                <p className="text-3xl font-bold">{filteredData.length}</p>
+                <p className="text-3xl font-bold animate-counter">
+                  {filteredData.length}
+                </p>
+                <p className="text-blue-200 text-xs mt-1">Active data points</p>
               </div>
-              <div className="bg-white/20 p-3 rounded-xl">
+              <div className="bg-white/20 p-3 rounded-xl animate-pulse">
                 <svg
                   className="w-8 h-8"
                   fill="none"
@@ -202,13 +298,13 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-purple-500 to-pink-600 p-6 rounded-2xl text-white shadow-xl">
+          <div className="bg-gradient-to-r from-purple-500 to-pink-600 p-6 rounded-2xl text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 animate-slide-up delay-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-purple-100 text-sm font-medium">
-                  Average Sale
+                <p className="text-purple-100 text-sm font-medium flex items-center gap-2">
+                  📈 Average Sale
                 </p>
-                <p className="text-3xl font-bold">
+                <p className="text-3xl font-bold animate-counter">
                   $
                   {filteredData.length > 0
                     ? Math.round(
@@ -219,8 +315,9 @@ export default function Dashboard() {
                       ).toLocaleString()
                     : 0}
                 </p>
+                <p className="text-purple-200 text-xs mt-1">Per transaction</p>
               </div>
-              <div className="bg-white/20 p-3 rounded-xl">
+              <div className="bg-white/20 p-3 rounded-xl animate-pulse">
                 <svg
                   className="w-8 h-8"
                   fill="none"
@@ -238,7 +335,150 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {/* Enhanced Charts Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+          <div className="transform hover:scale-105 transition-all duration-300 animate-slide-up delay-400">
+            <LineChartComponent data={filteredData} />
+          </div>
+          <div className="transform hover:scale-105 transition-all duration-300 animate-slide-up delay-500">
+            <BarChartComponent data={filteredData} />
+          </div>
+          <div className="transform hover:scale-105 transition-all duration-300 animate-slide-up delay-600">
+            <PieChartComponent data={filteredData} />
+          </div>
+          <div className="transform hover:scale-105 transition-all duration-300 animate-slide-up delay-700">
+            <ComposedChartComponent data={filteredData} />
+          </div>
+          <div className="transform hover:scale-105 transition-all duration-300 animate-slide-up delay-800">
+            <AreaChartComponent data={filteredData} />
+          </div>
+          <div className="transform hover:scale-105 transition-all duration-300 animate-slide-up delay-900">
+            <RadarChartComponent data={filteredData} />
+          </div>
+        </div>
+
+        {/* Fun Footer */}
+        <div className="text-center py-8 animate-fade-in">
+          <p className="text-gray-600 flex items-center justify-center gap-2">
+            Made with NextDevs❤️ for amazing analytics
+            <span className="animate-bounce">🚀</span>
+          </p>
+        </div>
       </div>
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes slide-in-left {
+          from {
+            transform: translateX(-100px);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+
+        @keyframes slide-up {
+          from {
+            transform: translateY(50px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        @keyframes float {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-20px);
+          }
+        }
+
+        @keyframes float-delayed {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-30px);
+          }
+        }
+
+        @keyframes float-slow {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-15px);
+          }
+        }
+
+        .animate-fade-in {
+          animation: fade-in 1s ease-out;
+        }
+        .animate-slide-in-left {
+          animation: slide-in-left 1s ease-out;
+        }
+        .animate-slide-up {
+          animation: slide-up 0.8s ease-out;
+        }
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+        .animate-float-delayed {
+          animation: float-delayed 4s ease-in-out infinite;
+        }
+        .animate-float-slow {
+          animation: float-slow 5s ease-in-out infinite;
+        }
+        .animate-counter {
+          animation: fade-in 1.5s ease-out;
+        }
+
+        .delay-100 {
+          animation-delay: 0.1s;
+        }
+        .delay-200 {
+          animation-delay: 0.2s;
+        }
+        .delay-300 {
+          animation-delay: 0.3s;
+        }
+        .delay-400 {
+          animation-delay: 0.4s;
+        }
+        .delay-500 {
+          animation-delay: 0.5s;
+        }
+        .delay-600 {
+          animation-delay: 0.6s;
+        }
+        .delay-700 {
+          animation-delay: 0.7s;
+        }
+        .delay-800 {
+          animation-delay: 0.8s;
+        }
+        .delay-900 {
+          animation-delay: 0.9s;
+        }
+      `}</style>
     </main>
   );
 }
