@@ -10,6 +10,7 @@ import {
   ComposedChartComponent,
   AreaChartComponent,
   RadarChartComponent,
+  ThemeToggle,
 } from "@/components";
 
 export default function Dashboard() {
@@ -75,10 +76,10 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-xl font-semibold text-gray-700">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 dark:border-purple-400 mx-auto mb-4"></div>
+          <p className="text-xl font-semibold text-gray-700 dark:text-gray-300">
             Loading Dashboard...
           </p>
         </div>
@@ -87,22 +88,28 @@ export default function Dashboard() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+    <main className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-indigo-900/20 transition-colors duration-300">
       {/* Animated Header Section */}
-      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-xl relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/10"></div>
+      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-800 dark:via-purple-800 dark:to-pink-800 shadow-xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10 dark:bg-black/30"></div>
         <div className="relative p-8">
-          <div className="flex items-center gap-4 animate-fade-in">
-            <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm animate-bounce">
-              <span className="text-4xl">📊</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 animate-fade-in">
+              <div className="bg-white/20 dark:bg-white/10 p-3 rounded-xl backdrop-blur-sm animate-bounce">
+                <span className="text-4xl">📊</span>
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-white drop-shadow-lg animate-slide-in-left">
+                  Sales Analytics Dashboard
+                </h1>
+                <p className="text-indigo-100 dark:text-indigo-200 mt-2 text-lg animate-slide-in-left delay-100">
+                  Track your business performance with real-time insights ✨
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-4xl font-bold text-white drop-shadow-lg animate-slide-in-left">
-                Sales Analytics Dashboard
-              </h1>
-              <p className="text-indigo-100 mt-2 text-lg animate-slide-in-left delay-100">
-                Track your business performance with real-time insights ✨
-              </p>
+            {/* Theme Toggle Button */}
+            <div className="animate-fade-in delay-300">
+              <ThemeToggle />
             </div>
           </div>
         </div>
@@ -117,9 +124,9 @@ export default function Dashboard() {
 
       <div className="p-8 space-y-8">
         {/* Enhanced Filter Section with Quick Filters */}
-        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/50 animate-slide-up">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-white/50 dark:border-gray-700/50 animate-slide-up transition-colors duration-300">
           <div className="flex items-center gap-3 mb-6">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-lg">
+            <div className="bg-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-600 dark:to-purple-600 p-2 rounded-lg">
               <svg
                 className="w-5 h-5 text-white"
                 fill="none"
@@ -134,7 +141,7 @@ export default function Dashboard() {
                 />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-800">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
               Smart Filters
             </h2>
           </div>
@@ -152,8 +159,8 @@ export default function Dashboard() {
                 onClick={() => handleQuickFilter(filter.key)}
                 className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
                   activeFilter === filter.key
-                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg transform scale-105"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105"
+                    ? "bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white shadow-lg transform scale-105"
+                    : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-105"
                 }`}
               >
                 <span>{filter.icon}</span>
@@ -165,29 +172,29 @@ export default function Dashboard() {
           {/* Custom Date Range */}
           <div className="flex flex-wrap items-end gap-6">
             <div className="min-w-0 flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 📅 Start Date
               </label>
               <input
                 type="date"
-                className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 hover:border-gray-300 text-black"
+                className="w-full border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-black dark:text-white p-3 rounded-xl focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-500"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
               />
             </div>
             <div className="min-w-0 flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 📅 End Date
               </label>
               <input
                 type="date"
-                className="w-full border-2 border-gray-200 p-3 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 hover:border-gray-300 text-black"
+                className="w-full border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-black dark:text-white p-3 rounded-xl focus:border-purple-500 dark:focus:border-purple-400 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-500"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
               />
             </div>
             <button
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 dark:from-blue-500 dark:to-purple-500 dark:hover:from-blue-600 dark:hover:to-purple-600 text-white px-8 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
               onClick={handleFilter}
             >
               <svg
@@ -213,7 +220,7 @@ export default function Dashboard() {
             </button>
             <button
               onClick={clearFilters}
-              className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2"
+              className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2"
             >
               <svg
                 className="w-5 h-5"
@@ -360,7 +367,7 @@ export default function Dashboard() {
 
         {/* Fun Footer */}
         <div className="text-center py-8 animate-fade-in">
-          <p className="text-gray-600 flex items-center justify-center gap-2">
+          <p className="text-gray-600 dark:text-gray-400 flex items-center justify-center gap-2 transition-colors duration-300">
             Made with NextDevs❤️ for amazing analytics
             <span className="animate-bounce">🚀</span>
           </p>
